@@ -18,16 +18,16 @@ jobs:
           go-version: '1.23.x'
       - name: Test
         run: go test ./...
-      - name: Build
+      - name: Build MobaWinSCP
         run: go build -trimpath -ldflags "-s -w" -o MobaWinSCP.exe ./cmd/mobawinscp
       - name: Build MSAA diagnostic
-        shell: powershell
+        shell: pwsh
         run: |
-          & "$env:WINDIR\Microsoft.NET\Framework64\v4.0.30319\csc.exe" `
-            /nologo `
-            /reference:Accessibility.dll `
-            /out:MsaaDump.exe `
-            tools\MsaaDump.cs
+          & "$env:WINDIR\Microsoft.NET\Framework64\v4.0.30319\csc.exe" /nologo /reference:Accessibility.dll /out:MsaaDump.exe tools\MsaaDump.cs
+      - name: Build MobaProbe diagnostic
+        shell: pwsh
+        run: |
+          & "$env:WINDIR\Microsoft.NET\Framework64\v4.0.30319\csc.exe" /nologo /reference:System.Management.dll /out:MobaProbe.exe tools\MobaProbe.cs
       - uses: actions/upload-artifact@v4
         with:
           name: MobaWinSCP-windows-amd64
@@ -36,3 +36,7 @@ jobs:
         with:
           name: MsaaDump-windows-amd64
           path: MsaaDump.exe
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MobaProbe-windows-amd64
+          path: MobaProbe.exe
