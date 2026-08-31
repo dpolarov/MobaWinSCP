@@ -20,7 +20,19 @@ jobs:
         run: go test ./...
       - name: Build
         run: go build -trimpath -ldflags "-s -w" -o MobaWinSCP.exe ./cmd/mobawinscp
+      - name: Build MSAA diagnostic
+        shell: powershell
+        run: |
+          & "$env:WINDIR\Microsoft.NET\Framework64\v4.0.30319\csc.exe" `
+            /nologo `
+            /reference:Accessibility.dll `
+            /out:MsaaDump.exe `
+            tools\MsaaDump.cs
       - uses: actions/upload-artifact@v4
         with:
           name: MobaWinSCP-windows-amd64
           path: MobaWinSCP.exe
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MsaaDump-windows-amd64
+          path: MsaaDump.exe
