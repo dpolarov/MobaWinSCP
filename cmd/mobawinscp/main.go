@@ -7,6 +7,7 @@ import (
 
 	"github.com/dpolarov/MobaWinSCP/internal/app"
 	"github.com/dpolarov/MobaWinSCP/internal/hotkey"
+	"github.com/dpolarov/MobaWinSCP/internal/session"
 )
 
 var version = "dev"
