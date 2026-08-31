@@ -9,6 +9,8 @@ import (
 	"strings"
 )
 
+const DefaultPortablePath = `I:\utils\WinSCP\WinSCP.exe`
+
 type LaunchOptions struct {
 	Executable string
 	Host       string
@@ -19,6 +21,7 @@ type LaunchOptions struct {
 }
 
 func Locate(explicit string) (string, error) {
+	// Explicit command-line/config value always wins.
 	if explicit != "" { return existing(explicit) }
 	if p, err := exec.LookPath("WinSCP.exe"); err == nil { return p, nil }
 	for _, root := range []string{os.Getenv("ProgramFiles(x86)"), os.Getenv("ProgramFiles"), os.Getenv("LOCALAPPDATA")} {
@@ -27,7 +30,10 @@ func Locate(explicit string) (string, error) {
 			p := filepath.Join(root, rel); if st, err := os.Stat(p); err == nil && !st.IsDir() { return p, nil }
 		}
 	}
-	return "", fmt.Errorf("WinSCP.exe not found; pass -winscp C:\\path\\WinSCP.exe")
+	// User's portable layout. Keep this as a final fallback so normal
+	// installations and explicit overrides remain portable for other users.
+	if p, err := existing(DefaultPortablePath); err == nil { return p, nil }
+	return "", fmt.Errorf("WinSCP.exe not found; pass -winscp C:\\path\\WinSCP.exe (default fallback: %s)", DefaultPortablePath)
 }
 
 func Args(o LaunchOptions) []string {
