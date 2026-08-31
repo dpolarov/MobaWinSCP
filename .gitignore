@@ -1,0 +1,5 @@
+MobaWinSCP.exe
+*.exe
+*.log
+.vscode/
+.idea/
