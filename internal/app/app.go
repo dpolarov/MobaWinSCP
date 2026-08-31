@@ -18,6 +18,10 @@ type Options struct {
 func Run(o Options) error {
 	live, err := session.Detect()
 	if err != nil { return err }
+	return RunSession(o, live)
+}
+
+func RunSession(o Options, live session.Session) error {
 	ini, err := mobaxterm.LocateINI(o.INIPath)
 	if err != nil { return err }
 	bookmarks, err := mobaxterm.ParseFile(ini)
