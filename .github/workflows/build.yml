@@ -27,7 +27,12 @@ jobs:
       - name: Build MobaProbe diagnostic
         shell: pwsh
         run: |
-          & "$env:WINDIR\Microsoft.NET\Framework64\v4.0.30319\csc.exe" /nologo /reference:System.Management.dll /out:MobaProbe.exe tools\MobaProbe.cs
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          $vs = & $vswhere -latest -products * -property installationPath
+          if (-not $vs) { throw "Visual Studio installation not found" }
+          $csc = Join-Path $vs "MSBuild\Current\Bin\Roslyn\csc.exe"
+          if (-not (Test-Path $csc)) { throw "Roslyn csc.exe not found: $csc" }
+          & $csc /nologo /reference:System.Management.dll /out:MobaProbe.exe tools\MobaProbe.cs
       - uses: actions/upload-artifact@v4
         with:
           name: MobaWinSCP-windows-amd64
