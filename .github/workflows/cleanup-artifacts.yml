@@ -6,7 +6,7 @@ name: Cleanup 12-hour Actions artifacts
 on:
   workflow_dispatch:
   schedule:
-    - cron: '37 */2 * * *'
+    - cron: '37 */12 * * *'
 
 permissions:
   contents: read
