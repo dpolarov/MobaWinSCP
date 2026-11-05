@@ -3,6 +3,7 @@ name: Build
 on:
   push:
     branches: [main]
+    tags: ['v*']
   pull_request:
 
 permissions:
@@ -35,13 +36,39 @@ jobs:
           & $csc /nologo /reference:System.Management.dll /out:MobaProbe.exe tools\MobaProbe.cs
       - uses: actions/upload-artifact@v4
         with:
+          retention-days: 1
           name: MobaWinSCP-windows-amd64
           path: MobaWinSCP.exe
       - uses: actions/upload-artifact@v4
         with:
+          retention-days: 1
           name: MsaaDump-windows-amd64
           path: MsaaDump.exe
       - uses: actions/upload-artifact@v4
         with:
+          retention-days: 1
           name: MobaProbe-windows-amd64
           path: MobaProbe.exe
+
+  release:
+    name: Publish tagged binaries to Releases
+    needs: test-build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: release-dist
+          merge-multiple: true
+      - name: Create GitHub Release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mapfile -d '' assets < <(find release-dist -type f -name '*.exe' -print0)
+          test "${#assets[@]}" -gt 0 || { echo "No EXEs found"; exit 1; }
+          gh release create "$GITHUB_REF_NAME" "${assets[@]}" \
+            --title "MobaWinSCP $GITHUB_REF_NAME" --generate-notes
